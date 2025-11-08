@@ -1,62 +1,53 @@
+# app.py (Streamlit version using Hugging Face GPT-OSS)
 import os
-import openai
-import tiktoken
 from colorama import Fore
 from dotenv import load_dotenv
+import streamlit as st
+from huggingface_hub import InferenceClient
 
+# Load environment variables
+load_dotenv()
+HF_TOKEN = os.getenv("HF_TOKEN")
+MODEL = "openai/gpt-oss-20b"
 
-# Load the environment variables - set up the OpenAI API client
+# Initialize Hugging Face client
+if not HF_TOKEN:
+    st.error("⚠️ Missing HF_TOKEN in your .env file")
+    st.stop()
 
+llm_client = InferenceClient(model=MODEL, token=HF_TOKEN)
 
-# Set up the model and prompt
-
-
-def get_tokens(user_input: str) -> int:
-    """Returns the number of tokens in a text string."""
-
-    encoding = tiktoken.get_encoding("cl100k_base")
-
-    token_integers = encoding.encode(user_input)
-    tokens_usage = len(token_integers)
-
-    tokenized_input = tokenized_input = list(
-        map(
-            lambda x: encoding.decode_single_token_bytes(x).decode("utf-8"),
-            encoding.encode(user_input),
+# Function to query the Hugging Face model
+def ask_model(prompt: str) -> str:
+    try:
+        response = llm_client.chat_completion(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=400,
+            temperature=0.7,
         )
-    )
-    print(f"{encoding}: {tokens_usage} tokens")
-    print(f"token integers: {tokens_usage}")
-    print(f"token bytes: {tokenized_input}")
+        return response.choices[0].message["content"]
+    except Exception as e:
+        return f"Error communicating with model: {e}"
 
+# Streamlit UI — same logical flow, just web-based
+st.set_page_config(page_title="Hugging Face GPT-OSS Assistant", layout="centered")
 
-def start():
-    print("MENU")
-    print("====")
-    print("[1]- Ask a question")
-    print("[2]- Exit")
-    choice = input("Enter your choice: ")
-    if choice == "1":
-        ask()
-    elif choice == "2":
-        exit()
-    else:
-        print("Invalid choice")
+st.title("🧠 GPT-OSS Streamlit Assistant")
+st.markdown("Type your question below. Click **Submit** to get an answer.")
 
+# Simulate your “MENU” logic in a simple Streamlit interface
+choice = st.radio("Select an option:", ["Ask a question", "Exit"])
 
-def ask():
-    """Ask a question and get a response from the model."""
-    instructions = (
-        "Type your question and press ENTER. Type 'x' to go back to the MAIN menu.\n"
-    )
-    print(Fore.BLUE + "\n\x1B[3m" + instructions + "\x1B[0m" + Fore.RESET)
+if choice == "Ask a question":
+    user_input = st.text_input("Q:", placeholder="Type your question here...")
+    if user_input:
+        st.write(Fore.YELLOW + "Thinking..." + Fore.RESET)
+        answer = ask_model(user_input)
+        st.markdown(f"**A:** {answer}")
 
-    user_input = input("Q: ")
-
-    # Exit
-    if user_input == "x":
-        start()
-
-
-if __name__ == "__main__":
-    start()
+elif choice == "Exit":
+    st.info("👋 Session ended. Close the app window to exit.")

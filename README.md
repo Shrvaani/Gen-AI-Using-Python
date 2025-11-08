@@ -35,15 +35,23 @@ pip install -r requirements.txt
 pip3 install -r requirements.txt
 ```
 
-## [get an API key](https://platform.openai.com/account/api-keys)
+## [Get a Hugging Face API Key](https://huggingface.co/settings/tokens)
 
-.env file
+1. Visit https://huggingface.co/settings/tokens
 
-OPENAI_API_KEY=YOUR-OPENAI-KEY
+2. Click “New Token”
 
+3. Choose Read Access
 
-`export OPENAI_API_KEY='YOUR-OPENAI-KEY'`
+4. Copy your token (it starts with hf_...)
 
+## .env File Setup:
+
+Create a **.env** file in your project root:
+
+```
+HF_TOKEN=hf_your_huggingface_token_here
+```
 
 ## Run the script:
 
@@ -56,3 +64,17 @@ streamlit run main.py
 ```
 streamlit run main.py
 ```
+
+##Tech Stack:
+
+**Language:** Python 3.12
+
+**Framework:** Streamlit
+
+**Model Provider:** Hugging Face Inference API
+
+**Model Used:** openai/gpt-oss-20b (or any other open-source model of your choice)
+
+**Environment Management:** Python venv
+
+**Environment Variables:** Managed using python-dotenv

@@ -1,0 +1,71 @@
+# ===================================
+# Python / Streamlit Project .gitignore
+# ===================================
+
+# --- Virtual Environment ---
+env/
+venv/
+.genai_env/
+.genai/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Environment Variables & Config ---
+.env
+.env.*
+*.ini
+*.cfg
+
+# --- macOS / Linux System Files ---
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Icon?
+ehthumbs.db
+
+# --- Logs & Cache ---
+*.log
+logs/
+*.tmp
+*.swp
+.cache/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Streamlit ---
+.streamlit/
+# If you save user data locally
+outputs/
+data/
+uploads/
+temp/
+tmp/
+
+# --- VSCode / Editor / IDE ---
+.vscode/
+.idea/
+*.code-workspace
+
+# --- Python Packaging ---
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# --- Test Files ---
+.coverage
+htmlcov/
+.tox/
+.nox/
+pytestdebug.log
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints/
+
+# --- Hugging Face Cache ---
+~/.cache/huggingface/
+huggingface_cache/
