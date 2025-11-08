@@ -1,30 +1,48 @@
+# main.py
+
 import streamlit as st
-from handlers import downloadFile, generate_image, get_files
+from handlers import generate_image, get_files
+from PIL import Image
 
-desired_size = (600, 400)
+st.set_page_config(page_title="AI Image Gallery", layout="wide")
+st.title("🖼️ AI-Powered Image Gallery ✨")
+st.markdown("Generate images with Hugging Face's FLUX model and browse your saved gallery.")
 
-# Streamlit App
-st.title("🖼️ Image Generation Gallery ✨")  # Add a title
-margin = '<div style="margin: 20px 5px;"></div>'
+# ✅ Persistent input using Session State
+if "user_prompt" not in st.session_state:
+    st.session_state["user_prompt"] = ""
 
-# User input
-with st.form("user_form", clear_on_submit=True):
-    user_input = st.text_input("Type something")
-    submit_button = st.form_submit_button(label="Send")
+with st.form("prompt_form"):
+    user_input = st.text_input(
+        "Describe your image prompt:",
+        value=st.session_state["user_prompt"],
+        key="prompt_input",
+        placeholder="Type anything... e.g. 'a futuristic city skyline at sunset'",
+    )
+    submitted = st.form_submit_button("Generate")
 
-# Press Enter to generate response from chatbot
-if submit_button:
-    with st.spinner("Genereting image..."):
-        image = generate_image(user_input)
-        st.image(image, use_column_width=True)
-        saved_image= downloadFile(user_input, image)
-        st.success("Image succesfully genereated and saved to the media folder")
+if submitted:
+    st.session_state["user_prompt"] = user_input  # Save last input
+    with st.spinner("Generating your image... please wait ⌛"):
+        try:
+            image_path = generate_image(user_input)
+            st.success(f"Image saved to: `{image_path}`")
+            st.image(Image.open(image_path), caption=user_input, use_column_width=True)
+        except Exception as e:
+            st.error(f"Error: {e}")
 
+st.markdown("---")
+st.header("📸 Gallery")
 
 def display_gallery():
-    """Display all images in the gallery"""
-    pass
+    files = get_files()
+    if not files:
+        st.info("No images yet. Generate one above to start your gallery!")
+        return
+    cols = st.columns(3)
+    for i, f in enumerate(files):
+        col = cols[i % 3]
+        img = Image.open(f["file_path"])
+        col.image(img, caption=f["title"], use_column_width=True)
 
-
-if __name__ == "__main__":
-    display_gallery()
+display_gallery()

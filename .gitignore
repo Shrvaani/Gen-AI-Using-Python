@@ -1,0 +1,19 @@
+# Ignore test files and outputs
+test.py
+test_output.png
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment / secrets
+.env
+
+# Streamlit / logs / misc
+.streamlit/
+logs/
+.DS_Store
+.vscode/
+.idea/

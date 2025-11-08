@@ -1,62 +1,64 @@
-import openai
-from PIL import Image
+# handlers.py
+
 import os
 import requests
-import ssl
+from PIL import Image
+from io import BytesIO
+import re
+import time
 from dotenv import load_dotenv
 
-
-# Specify the folder path
-folder_path = "media"
-
+# Load environment variables
 load_dotenv()
-client = openai.OpenAI()
+
+HF_TOKEN = os.getenv("HF_TOKEN")
+MODEL_ID = os.getenv("HF_MODEL_ID", "black-forest-labs/FLUX.1-dev")
+
+# Folder for saving generated images
+FOLDER_PATH = "media"
+os.makedirs(FOLDER_PATH, exist_ok=True)
 
 
-def downloadFile(user_input, url):
-    """Download a file from a URL"""
-    try:
-        # It's recommended to verify SSL certificates
-        ssl._create_default_https_context = ssl._create_unverified_context
-        r = requests.get(url, allow_redirects=True)
-        r.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
+def _safe_filename(prompt: str) -> str:
+    """Generate a safe filename based on the prompt."""
+    safe = re.sub(r'[^A-Za-z0-9_\-\.]', '_', prompt)[:60]
+    timestamp = int(time.time())
+    return f"image_{safe}_{timestamp}.png"
 
-        # Process the save path
-        file_path = os.path.join(
-            "media", os.path.basename("image_" + user_input.replace(" ", "_")) + ".png"
+
+def generate_image(prompt: str = "a white siamese cat"):
+    """Generate an image using Hugging Face Inference API."""
+    if not HF_TOKEN:
+        raise ValueError("HF_TOKEN not found. Please set it in your .env file.")
+
+    url = f"https://router.huggingface.co/hf-inference/models/{MODEL_ID}"
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    payload = {"inputs": prompt, "options": {"wait_for_model": True}}
+
+    response = requests.post(url, headers=headers, json=payload, stream=True)
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Failed to generate image ({response.status_code}): {response.text}"
         )
 
-        with open(file_path, "wb") as f:
-            f.write(r.content)
-        return f"File downloaded successfully and saved to {file_path}"
+    if "image" not in response.headers.get("content-type", ""):
+        raise RuntimeError(f"Unexpected response: {response.text}")
 
-    except requests.RequestException as e:
-        print(f"An error occurred while downloading the file: {e}")
+    # Save image to disk
+    image = Image.open(BytesIO(response.content))
+    filename = _safe_filename(prompt)
+    filepath = os.path.join(FOLDER_PATH, filename)
+    image.save(filepath, format="PNG")
+    return filepath
 
 
 def get_files():
-    """Get all image files in the folder"""
-    # List all files in the folder
-    files = os.listdir(folder_path)
-    images = []
-    # Filter out image files (assuming JPEG and PNG formats)
-    image_files = [f for f in files if f.endswith(".jpg") or f.endswith(".png")]
-
-    # Display each image
-    for image_file in image_files:
-        image_path = os.path.join(folder_path, image_file)
-        image = Image.open(image_path)
-        images.append({"file": image, "title": image_file})
-    return images
-
-
-def generate_image(user_input="a white siamese cat"):
-    """Generate an image based on the user input"""
-    response = client.images.generate(
-        model="dall-e-3",
-        prompt="a white siamese cat",
-        size="1024x1024",
-        quality="standard",
-        n=1,
-        )
-    return response.data[0].url
+    """Return all images in the media folder."""
+    files = []
+    for fname in sorted(os.listdir(FOLDER_PATH), reverse=True):
+        if fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+            files.append(
+                {"file_path": os.path.join(FOLDER_PATH, fname), "title": fname}
+            )
+    return files
