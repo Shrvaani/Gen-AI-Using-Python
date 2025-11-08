@@ -1,5 +1,8 @@
-colorama==0.4.6
+# --- Core dependencies ---
+streamlit==1.39.0
 python-dotenv==1.0.0
-tiktoken==0.5.1
+colorama==0.4.6
+huggingface-hub==0.25.2
+
+# --- Optional: For safe token handling and basic utilities ---
 requests==2.31.0
-huggingface-hub==0.16.4
