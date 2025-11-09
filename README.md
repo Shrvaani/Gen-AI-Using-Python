@@ -15,7 +15,7 @@ The **main** branch serves as a stable base that integrates the project’s core
 1. [AI-Assistant](https://github.com/Shrvaani/Gen-AI-Using-Python/tree/AI_Assistant) - An AI-powered virtual assistant that answers user queries using LLMs.
 2. [AI-Powered-Image-Gallery](https://github.com/Shrvaani/Gen-AI-Using-Python/tree/AI_Powered_Image_Gallery) - An intelligent image gallery with automated tagging and categorization.
 
-##Hugging Face Integration:
+## Hugging Face Integration:
 The LaughBot branch now uses the Hugging Face Router API instead of OpenAI.
 This allows the chatbot to run fully in the cloud — ideal for deploying on Streamlit Cloud or Hugging Face Spaces, without requiring any local downloads or model hosting.
 
@@ -25,7 +25,7 @@ Ensure you have the required Python dependencies installed.
 ```
 pip install -r requirements.txt
 ```
-##Requirements include:
+## Requirements include:
 
 ```
 streamlit
@@ -55,7 +55,7 @@ HF_MODEL_ID=HuggingFaceH4/zephyr-7b-beta
 streamlit run main.py
 ```
 
-##Access the App:
+## Access the App:
 
 ```
 Local: http://localhost:8501
